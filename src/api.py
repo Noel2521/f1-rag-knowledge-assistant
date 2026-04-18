@@ -1,11 +1,9 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from src.ingest import ingest_document, load_vector_store
 from src.pipeline import build_rag_chain
 
-
 app = FastAPI()
-
 
 qa_chain = None
 
@@ -13,16 +11,26 @@ class IngestRequest(BaseModel):
     pdf_path: str
 
 class AskRequest(BaseModel):
-    question:str
+    question: str
+
+@app.get("/health")
+def health():
+    return {
+        "status": "ok",
+        "model": "llama3.2",
+        "document_ingested": qa_chain is not None
+    }
 
 @app.post("/ingest")
-def ingest(request:IngestRequest):
+def ingest(request: IngestRequest):
     vector_store = ingest_document(request.pdf_path)
     global qa_chain
     qa_chain = build_rag_chain(vector_store)
-    return {"status": "success","message": "Document ingested!"}
+    return {"status": "success", "message": "Document ingested!"}
 
 @app.post("/ask")
 def ask(request: AskRequest):
+    if qa_chain is None:
+        raise HTTPException(status_code=400, detail="No document ingested yet. Please call /ingest first.")
     result = qa_chain.invoke({"query": request.question})
-    return{"answer": result['result']}
+    return {"answer": result["result"]}
