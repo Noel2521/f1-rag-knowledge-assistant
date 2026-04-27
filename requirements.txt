@@ -1,9 +1,27 @@
+# Core RAG stack
 langchain==0.2.6
 langchain-community==0.2.6
 langchain-chroma==0.1.2
+langchain-text-splitters
+langchain-huggingface
+langchain-ollama
+
+# Embeddings
 sentence-transformers==3.0.1
+
+# Vector store
 chromadb==0.5.3
+
+# PDF reading
 pypdf==4.2.0
+
+# API
 fastapi==0.111.0
 uvicorn==0.30.1
+
+# Evaluation
+ragas
+datasets
+
+# Utilities
 python-dotenv==1.0.1
